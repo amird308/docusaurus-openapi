@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  * ========================================================================== */
 
+import axios from "axios";
 import sdk from "postman-collection";
 
 import { Body } from "../Body/slice";
@@ -39,11 +40,20 @@ async function makeRequest(
 ) {
   const headers = request.toJSON().header;
 
-  let myHeaders = new Headers();
+  // let myHeaders = new Headers();
+  // if (headers) {
+  //   headers.forEach((header) => {
+  //     if (header.key && header.value) {
+  //       myHeaders.append(header.key, header.value);
+  //     }
+  //   });
+  // }
+
+  let myHeaders: Record<string, any> = {};
   if (headers) {
     headers.forEach((header) => {
       if (header.key && header.value) {
-        myHeaders.append(header.key, header.value);
+        myHeaders[header.key] = header.value;
       }
     });
   }
@@ -143,7 +153,19 @@ async function makeRequest(
         myBody = new FormData();
         if (Array.isArray(body.formdata)) {
           for (const data of body.formdata) {
-            if (data.key && data.value) {
+            if (
+              data.key &&
+              _body.type === "form" &&
+              _body?.content?.[data.key]?.value &&
+              _body?.content?.[data.key]?.type === "file"
+            ) {
+              // @ts-ignore
+              myBody.append(
+                data.key,
+                _body.content?.[data.key]?.value?.content as Blob
+              );
+            } else if (data.key && data.value) {
+              console.log("fucker2");
               myBody.append(data.key, data.value);
             }
           }
@@ -174,9 +196,20 @@ async function makeRequest(
     finalUrl = normalizedProxy + request.url.toString();
   }
 
-  return await fetch(finalUrl, requestOptions).then((response) => {
-    return response.text();
-  });
+  return await axios
+    .request({
+      url: finalUrl,
+      headers: myHeaders,
+      method: request.method,
+      data: myBody,
+    })
+    .then((response) => {
+      return JSON.stringify({ data: response.data, status: response.status });
+    });
+
+  // return await fetch(finalUrl, requestOptions).then((response) => {
+  //   return response.text();
+  // });
 }
 
 export default makeRequest;
