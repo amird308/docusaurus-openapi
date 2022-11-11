@@ -10,7 +10,7 @@ import pkg from "../lerna.json";
 import { getOutput } from "./utils/get-output";
 import { printBanner, printSpacer } from "./utils/print-utils";
 
-const ORG = "cloud-annotations";
+const ORG = "amird308";
 const REPO = "docusaurus-openapi";
 const BRANCH = "main";
 
