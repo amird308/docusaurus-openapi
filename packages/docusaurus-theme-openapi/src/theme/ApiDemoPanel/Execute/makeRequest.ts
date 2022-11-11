@@ -159,9 +159,9 @@ async function makeRequest(
               _body?.content?.[data.key]?.value &&
               _body?.content?.[data.key]?.type === "file"
             ) {
-              // @ts-ignore
               myBody.append(
                 data.key,
+                // @ts-ignore
                 _body.content?.[data.key]?.value?.content as Blob
               );
             } else if (data.key && data.value) {
